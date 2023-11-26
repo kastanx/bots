@@ -1,37 +1,6 @@
 const robot = require("robotjs");
-const TOP_OFFSET = 70;
+const { RUN_COORDS, INV_COORDS, TOP_OFFSET } = require("./config.js");
 const MARK_OF_GRACE = 11849;
-
-const INV_COORDS = [
-  { x: 1310, y: 701 },
-  { x: 1349, y: 702 },
-  { x: 1390, y: 703 },
-  { x: 1428, y: 704 },
-  { x: 1301, y: 736 },
-  { x: 1349, y: 737 },
-  { x: 1390, y: 737 },
-  { x: 1433, y: 737 },
-  { x: 1308, y: 771 },
-  { x: 1354, y: 772 },
-  { x: 1392, y: 773 },
-  { x: 1432, y: 773 },
-  { x: 1310, y: 809 },
-  { x: 1350, y: 810 },
-  { x: 1391, y: 810 },
-  { x: 1432, y: 808 },
-  { x: 1313, y: 842 },
-  { x: 1349, y: 849 },
-  { x: 1393, y: 847 },
-  { x: 1431, y: 846 },
-  { x: 1312, y: 881 },
-  { x: 1353, y: 882 },
-  { x: 1392, y: 881 },
-  { x: 1434, y: 881 },
-  { x: 1308, y: 917 },
-  { x: 1354, y: 918 },
-  { x: 1393, y: 918 },
-  { x: 1437, y: 917 },
-];
 
 class Area {
   points;
@@ -156,55 +125,6 @@ const MARK_OF_GRACE_AREAS = [
   area12,
 ];
 
-function pointInPolygon(x, y, z, polygon) {
-  if (z !== polygon[0].z) {
-    return false;
-  }
-
-  const numVertices = polygon.length;
-
-  let inside = false;
-
-  for (let i = 0, j = numVertices - 1; i < numVertices; j = i++) {
-    const xi = polygon[i].x;
-    const yi = polygon[i].y;
-    const xj = polygon[j].x;
-    const yj = polygon[j].y;
-
-    const intersect =
-      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
-
-    if (intersect) {
-      inside = !inside;
-    }
-  }
-
-  return inside;
-}
-
-const getData = async (
-  id = 0,
-  tileX = 0,
-  tileY = 0,
-  tileZ = 0,
-  tileItemId = 0
-) => {
-  const response = await fetch(
-    `http://localhost:8080/test?id=${id}&tileX=${tileX}&tileY=${tileY}&tileZ=${tileZ}&tileItemId=${tileItemId}`,
-    {
-      method: "GET",
-    }
-  ).catch(console.log);
-  return response.json();
-};
-
-const getInv = async () => {
-  const response = await fetch(`http://localhost:8080/inv`, {
-    method: "GET",
-  }).catch(console.log);
-  return response.json();
-};
-
 async function loop() {
   while (true) {
     try {
@@ -254,7 +174,7 @@ async function loop() {
       }
 
       if (!status?.isRunning && status?.runEnergy === 10000) {
-        await moveMouseClick(1312, 126);
+        await moveMouseClick(RUN_COORDS[0], RUN_COORDS[1]);
         log("turning run on");
         await sleep(200);
       }
@@ -338,11 +258,16 @@ async function loop() {
   }
 }
 
+async function getInv() {
+  const response = await fetch(`http://localhost:8080/inv`, {
+    method: "GET",
+  }).catch(console.log);
+  return response.json();
+}
+
 function randomCoordinatesWithinRadius(x, y, radius) {
-  // Generate a random angle between 0 and 2 * PI (360 degrees)
   const angle = Math.random() * Math.PI * 2;
 
-  // Calculate random coordinates within the circle using polar coordinates
   const randomX = x + radius * Math.cos(angle);
   const randomY = y + radius * Math.sin(angle);
 
@@ -393,6 +318,22 @@ function waitFor(callback) {
   });
 }
 
+async function getData(
+  id = 0,
+  tileX = 0,
+  tileY = 0,
+  tileZ = 0,
+  tileItemId = 0
+) {
+  const response = await fetch(
+    `http://localhost:8080/test?id=${id}&tileX=${tileX}&tileY=${tileY}&tileZ=${tileZ}&tileItemId=${tileItemId}`,
+    {
+      method: "GET",
+    }
+  ).catch(console.log);
+  return response.json();
+}
+
 function isInMarkLocation(playerX, playerY, playerZ, markX, markY, markZ) {
   const currentArea = MARK_OF_GRACE_AREAS.find((area) =>
     area.contains({ playerX, playerY, playerZ })
@@ -403,6 +344,32 @@ function isInMarkLocation(playerX, playerY, playerZ, markX, markY, markZ) {
   );
 
   return currentArea === markLocation;
+}
+
+function pointInPolygon(x, y, z, polygon) {
+  if (z !== polygon[0].z) {
+    return false;
+  }
+
+  const numVertices = polygon.length;
+
+  let inside = false;
+
+  for (let i = 0, j = numVertices - 1; i < numVertices; j = i++) {
+    const xi = polygon[i].x;
+    const yi = polygon[i].y;
+    const xj = polygon[j].x;
+    const yj = polygon[j].y;
+
+    const intersect =
+      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+
+    if (intersect) {
+      inside = !inside;
+    }
+  }
+
+  return inside;
 }
 
 function log(data) {

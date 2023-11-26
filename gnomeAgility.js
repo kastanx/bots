@@ -116,31 +116,31 @@ async function loop() {
 
       if (!status?.moving2 && firstArea.contains(status)) {
         const { gameObjects } = await getData(23134);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         await waitForXpDrop(secondArea);
       } else if (!status?.moving2 && secondArea.contains(status)) {
         const { gameObjects } = await getData(23559);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         await waitForXpDrop(thirdArea);
       } else if (!status?.moving2 && thirdArea.contains(status)) {
         const { gameObjects } = await getData(23557);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         await waitForXpDrop(fourthArea);
       } else if (!status?.moving2 && fourthArea.contains(status)) {
         const { gameObjects } = await getData(23560);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         await waitForXpDrop(fifthArea);
       } else if (!status?.moving2 && fifthArea.contains(status)) {
         const { gameObjects } = await getData(23135);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         await waitForXpDrop(sixthArea);
       } else if (!status?.moving2 && sixthArea.contains(status)) {
         const { gameObjects } = await getData(23138);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         await waitForXpDrop(seventhArea);
       } else if (!status?.moving2) {
         const { gameObjects } = await getData(23145);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         await waitForXpDrop(firstArea);
       }
     } catch (error) {}
@@ -175,9 +175,10 @@ async function waitForNewArea(area) {
   });
 }
 
-function moveMouseClick(x, y) {
-  const randomCoords = randomCoordinatesWithinRadius(x, y, 5);
+async function moveMouseClick(x, y, radius = 5) {
+  const randomCoords = randomCoordinatesWithinRadius(x, y, radius);
   robot.moveMouse(randomCoords.x, randomCoords.y + TOP_OFFSET);
+  await sleep(100);
   robot.moveMouseSmooth(randomCoords.x + 1, randomCoords.y + TOP_OFFSET + 1);
   robot.mouseClick("left");
 }

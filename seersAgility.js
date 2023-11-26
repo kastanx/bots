@@ -1,37 +1,6 @@
 const robot = require("robotjs");
-const TOP_OFFSET = 70;
 const MARK_OF_GRACE = 11849;
-
-const INV_COORDS = [
-  { x: 1310, y: 701 },
-  { x: 1349, y: 702 },
-  { x: 1390, y: 703 },
-  { x: 1428, y: 704 },
-  { x: 1301, y: 736 },
-  { x: 1349, y: 737 },
-  { x: 1390, y: 737 },
-  { x: 1433, y: 737 },
-  { x: 1308, y: 771 },
-  { x: 1354, y: 772 },
-  { x: 1392, y: 773 },
-  { x: 1432, y: 773 },
-  { x: 1310, y: 809 },
-  { x: 1350, y: 810 },
-  { x: 1391, y: 810 },
-  { x: 1432, y: 808 },
-  { x: 1313, y: 842 },
-  { x: 1349, y: 849 },
-  { x: 1393, y: 847 },
-  { x: 1431, y: 846 },
-  { x: 1312, y: 881 },
-  { x: 1353, y: 882 },
-  { x: 1392, y: 881 },
-  { x: 1434, y: 881 },
-  { x: 1308, y: 917 },
-  { x: 1354, y: 918 },
-  { x: 1393, y: 918 },
-  { x: 1437, y: 917 },
-];
+const { RUN_COORDS, INV_COORDS, TOP_OFFSET } = require("./config.js");
 
 class Area {
   points;
@@ -185,7 +154,7 @@ async function loop() {
             tileZ
           )
         ) {
-          moveMouseClick(groundItems[0]?.x, groundItems[0]?.y);
+          await moveMouseClick(groundItems[0]?.x, groundItems[0]?.y);
           log("picking mark of grace");
           await sleep(1000);
           continue;
@@ -197,7 +166,7 @@ async function loop() {
 
         for (const [index, value] of inv.entries()) {
           if (value.id === 7220 || value.id === 7218) {
-            moveMouseClick(
+            await moveMouseClick(
               INV_COORDS[index]?.x,
               INV_COORDS[index]?.y - TOP_OFFSET
             );
@@ -212,49 +181,49 @@ async function loop() {
       }
 
       if (!status?.isRunning && status?.runEnergy === 10000) {
-        moveMouseClick(1312, 126);
+        await moveMouseClick(RUN_COORDS[0], RUN_COORDS[1]);
         log("turning run on");
         await sleep(200);
       }
 
       if (!status?.moving2 && firstArea.contains(status)) {
         const { gameObjects } = await getData(14928);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to second area");
         await waitForXpDrop();
       } else if (!status?.moving2 && secondArea.contains(status)) {
         const { gameObjects } = await getData(14932);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to third area");
         await waitForXpDrop();
       } else if (!status?.moving2 && thirdArea.contains(status)) {
         const { gameObjects } = await getData(14929);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to fourth area");
         await waitForXpDrop();
       } else if (!status?.moving2 && fourthArea.contains(status)) {
         const { gameObjects } = await getData(14930);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to fifth area");
         await waitForXpDrop();
       } else if (!status?.moving2 && fifthArea.contains(status)) {
         const { gameObjects } = await getData(14931);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to final area");
         await waitForXpDrop();
       } else if (!status?.moving2 && finalArea.contains(status)) {
         const { status } = await getData(0, 2725, 3477, 0);
-        moveMouseClick(status?.tileX, status?.tileY, 10);
+        await moveMouseClick(status?.tileX, status?.tileY, 10);
         log("going to start tile");
         await sleep(500);
       } else if (!status?.moving2 && failArea.contains(status)) {
         const { status } = await getData(0, 2724, 3485, 0);
-        moveMouseClick(status?.tileX, status?.tileY, 10);
+        await moveMouseClick(status?.tileX, status?.tileY, 10);
         log("going to start tile from fail area");
         await sleep(500);
       } else if (!status?.moving2) {
         const { gameObjects } = await getData(14927);
-        moveMouseClick(gameObjects[0].x, gameObjects[0].y);
+        await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to first area");
         await waitForXpDrop();
       }
@@ -291,9 +260,10 @@ async function waitForNewArea(area) {
   });
 }
 
-function moveMouseClick(x, y, radius = 5) {
+async function moveMouseClick(x, y, radius = 5) {
   const randomCoords = randomCoordinatesWithinRadius(x, y, radius);
   robot.moveMouse(randomCoords.x, randomCoords.y + TOP_OFFSET);
+  await sleep(100);
   robot.moveMouseSmooth(randomCoords.x + 1, randomCoords.y + TOP_OFFSET + 1);
   robot.mouseClick("left");
 }

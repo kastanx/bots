@@ -1,4 +1,12 @@
 {
+  "scripts": {
+    "varrock": "node varrockAgility.js",
+    "gnome": "node gnomeAgility.js",
+    "relleka": "node rellekaAgility.js",
+    "seers": "node seersAgility.js",
+    "falador": "node faladorAgility.js",
+    "iron": "node ironMining.js"
+  },
   "dependencies": {
     "node-fetch": "^3.3.2",
     "robotjs": "^0.6.0"
