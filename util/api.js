@@ -20,3 +20,28 @@ export async function getInv() {
   }).catch(console.log);
   return response.json();
 }
+
+export async function getPath(start, end) {
+  const headers = new Headers();
+  headers.append("content-type", "application/json");
+  headers.append("origin", "https://explv.github.io");
+  headers.append("referer", "https://explv.github.io/");
+
+  const raw = JSON.stringify({
+    start,
+    end,
+    player: {
+      members: true,
+    },
+  });
+
+  return fetch("https://explv-map.siisiqf.workers.dev/", {
+    method: "POST",
+    body: raw,
+    headers,
+    redirect: "follow",
+  })
+    .then((response) => response.json())
+    .then((res) => res.path)
+    .catch(console.log);
+}
