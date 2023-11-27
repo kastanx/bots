@@ -1,22 +1,15 @@
-const robot = require("robotjs");
-const { RUN_COORDS, INV_COORDS, TOP_OFFSET } = require("./config.js");
+import { INV_COORDS, RUN_COORDS, TOP_OFFSET } from "./config.js";
+import { getData, getInv } from "./util/api.js";
+import { Area } from "./util/area.js";
+import {
+  isInMarkLocation,
+  log,
+  moveMouseClick,
+  sleep,
+  waitForAgilityXpDrop,
+} from "./util/util.js";
+
 const MARK_OF_GRACE = 11849;
-
-class Area {
-  points;
-  constructor(points) {
-    this.points = points;
-  }
-
-  contains(status) {
-    return pointInPolygon(
-      status.playerX,
-      status.playerY,
-      status.playerZ,
-      this.points
-    );
-  }
-}
 
 const area1 = new Area([
   { x: 3033, y: 3349, z: 3 },
@@ -144,7 +137,8 @@ async function loop() {
             status.playerZ,
             tileX,
             tileY,
-            tileZ
+            tileZ,
+            MARK_OF_GRACE_AREAS
           )
         ) {
           await moveMouseClick(groundItems[0]?.x, groundItems[0]?.y);
@@ -183,62 +177,62 @@ async function loop() {
         const { gameObjects } = await getData(14899);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to second area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area2.contains(status)) {
         const { gameObjects } = await getData(14901);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to third area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area3.contains(status)) {
         const { gameObjects } = await getData(14903);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to fourth area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area4.contains(status)) {
         const { gameObjects } = await getData(14904);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to fifth area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area5.contains(status)) {
         const { gameObjects } = await getData(14905);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to sixth area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area6.contains(status)) {
         const { gameObjects } = await getData(14911);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to seventh area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area7.contains(status)) {
         const { gameObjects } = await getData(14919);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to eigth area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area8.contains(status)) {
         const { gameObjects } = await getData(14920);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to ninth area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area9.contains(status)) {
         const { gameObjects } = await getData(14921);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to tenth area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area10.contains(status)) {
         const { gameObjects } = await getData(14923);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to eleventh area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area11.contains(status)) {
         const { gameObjects } = await getData(14924);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to twelvth area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       } else if (!status?.moving2 && area12.contains(status)) {
         const { gameObjects } = await getData(14925);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to thirteenth area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       }
       // start tile, fail tile
       else if (!status?.moving2 && failArea.contains(status)) {
@@ -250,132 +244,12 @@ async function loop() {
         const { gameObjects } = await getData(14898);
         await moveMouseClick(gameObjects[0].x, gameObjects[0].y);
         log("going to first area");
-        await waitForXpDrop();
+        await waitForAgilityXpDrop();
       }
     } catch (error) {}
 
     await sleep(300);
   }
-}
-
-async function getInv() {
-  const response = await fetch(`http://localhost:8080/inv`, {
-    method: "GET",
-  }).catch(console.log);
-  return response.json();
-}
-
-function randomCoordinatesWithinRadius(x, y, radius) {
-  const angle = Math.random() * Math.PI * 2;
-
-  const randomX = x + radius * Math.cos(angle);
-  const randomY = y + radius * Math.sin(angle);
-
-  return { x: randomX, y: randomY };
-}
-
-async function waitForXpDrop(waittime = 200) {
-  const { status: ogStatus } = await getData();
-  await waitFor(async () => {
-    const { status } = await getData();
-    return status.agilityXp !== ogStatus.agilityXp;
-  });
-  await sleep(waittime);
-}
-
-async function waitForNewArea(area) {
-  return waitFor(async () => {
-    const { status } = await getData();
-    return area.contains(status);
-  });
-}
-
-async function moveMouseClick(x, y, radius = 5) {
-  const randomCoords = randomCoordinatesWithinRadius(x, y, radius);
-  robot.moveMouse(randomCoords.x, randomCoords.y + TOP_OFFSET);
-  await sleep(100);
-  robot.moveMouseSmooth(randomCoords.x + 1, randomCoords.y + TOP_OFFSET + 1);
-  robot.mouseClick("left");
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function waitFor(callback) {
-  return new Promise((resolve) => {
-    const int = setInterval(async () => {
-      const condition = await callback();
-      if (condition) {
-        clearInterval(int);
-        resolve(true);
-      }
-    }, 10);
-    setTimeout(() => {
-      resolve(true);
-      clearInterval(int);
-    }, 5000);
-  });
-}
-
-async function getData(
-  id = 0,
-  tileX = 0,
-  tileY = 0,
-  tileZ = 0,
-  tileItemId = 0
-) {
-  const response = await fetch(
-    `http://localhost:8080/test?id=${id}&tileX=${tileX}&tileY=${tileY}&tileZ=${tileZ}&tileItemId=${tileItemId}`,
-    {
-      method: "GET",
-    }
-  ).catch(console.log);
-  return response.json();
-}
-
-function isInMarkLocation(playerX, playerY, playerZ, markX, markY, markZ) {
-  const currentArea = MARK_OF_GRACE_AREAS.find((area) =>
-    area.contains({ playerX, playerY, playerZ })
-  );
-
-  const markLocation = MARK_OF_GRACE_AREAS.find((area) =>
-    area.contains({ playerX: markX, playerY: markY, playerZ: markZ })
-  );
-
-  return currentArea === markLocation;
-}
-
-function pointInPolygon(x, y, z, polygon) {
-  if (z !== polygon[0].z) {
-    return false;
-  }
-
-  const numVertices = polygon.length;
-
-  let inside = false;
-
-  for (let i = 0, j = numVertices - 1; i < numVertices; j = i++) {
-    const xi = polygon[i].x;
-    const yi = polygon[i].y;
-    const xj = polygon[j].x;
-    const yj = polygon[j].y;
-
-    const intersect =
-      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
-
-    if (intersect) {
-      inside = !inside;
-    }
-  }
-
-  return inside;
-}
-
-function log(data) {
-  const date = new Date();
-  const logstring = `[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}] ${data}`;
-  console.log(logstring);
 }
 
 setTimeout(loop, 3000);

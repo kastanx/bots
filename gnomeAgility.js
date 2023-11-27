@@ -1,21 +1,6 @@
-const robot = require("robotjs");
-const TOP_OFFSET = 70;
-
-class Area {
-  points;
-  constructor(points) {
-    this.points = points;
-  }
-
-  contains(status) {
-    return pointInPolygon(
-      status.playerX,
-      status.playerY,
-      status.playerZ,
-      this.points
-    );
-  }
-}
+import { getData } from "./util/api.js";
+import { Area } from "./util/area.js";
+import { moveMouseClick, sleep } from "./util/util.js";
 
 const firstArea = new Area([
   { x: 2469, y: 3431, z: 0 },
@@ -69,46 +54,6 @@ const seventhArea = new Area([
   { x: 2481, y: 3435, z: 0 },
 ]);
 
-function pointInPolygon(x, y, z, polygon) {
-  if (z !== polygon[0].z) {
-    return false;
-  }
-
-  const numVertices = polygon.length;
-
-  let inside = false;
-
-  for (let i = 0, j = numVertices - 1; i < numVertices; j = i++) {
-    const xi = polygon[i].x;
-    const yi = polygon[i].y;
-    const xj = polygon[j].x;
-    const yj = polygon[j].y;
-
-    const intersect =
-      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
-
-    if (intersect) {
-      inside = !inside;
-    }
-  }
-
-  return inside;
-}
-
-const getData = async (id = 0, tileX = 0, tileY = 0, tileZ = 0) => {
-  const response = await fetch(
-    `http://localhost:8080/test?id=${id}&tileX${tileX}&tileY${tileY}&tileZ${tileZ}`,
-    {
-      method: "GET",
-    }
-  ).catch();
-  return response.json();
-};
-
-function getObject(id, objects) {
-  return objects.find((object) => object.id === id);
-}
-
 async function loop() {
   while (true) {
     try {
@@ -147,60 +92,6 @@ async function loop() {
 
     await sleep(300);
   }
-}
-
-function randomCoordinatesWithinRadius(x, y, radius) {
-  // Generate a random angle between 0 and 2 * PI (360 degrees)
-  const angle = Math.random() * Math.PI * 2;
-
-  // Calculate random coordinates within the circle using polar coordinates
-  const randomX = x + radius * Math.cos(angle);
-  const randomY = y + radius * Math.sin(angle);
-
-  return { x: randomX, y: randomY };
-}
-
-async function waitForXpDrop() {
-  const { status: ogStatus } = await getData();
-  await waitFor(async () => {
-    const { status } = await getData();
-    return status.agilityXp !== ogStatus.agilityXp;
-  });
-}
-
-async function waitForNewArea(area) {
-  return waitFor(async () => {
-    const { status } = await getData();
-    return area.contains(status);
-  });
-}
-
-async function moveMouseClick(x, y, radius = 5) {
-  const randomCoords = randomCoordinatesWithinRadius(x, y, radius);
-  robot.moveMouse(randomCoords.x, randomCoords.y + TOP_OFFSET);
-  await sleep(100);
-  robot.moveMouseSmooth(randomCoords.x + 1, randomCoords.y + TOP_OFFSET + 1);
-  robot.mouseClick("left");
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function waitFor(callback) {
-  return new Promise((resolve) => {
-    const int = setInterval(async () => {
-      const condition = await callback();
-      if (condition) {
-        clearInterval(int);
-        resolve(true);
-      }
-    }, 100);
-    setTimeout(() => {
-      resolve(true);
-      clearInterval(int);
-    }, 5000);
-  });
 }
 
 setTimeout(loop, 3000);
