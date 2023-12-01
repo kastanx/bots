@@ -32,7 +32,66 @@ export async function waitForAgilityXpDrop(waittime = 200) {
   await sleep(waittime);
 }
 
-function waitFor(callback) {
+export async function waitForLoginInput() {
+  const startTime = Date.now();
+  while (true) {
+    robot.keyTap("enter");
+    await sleep(1000);
+    const { status } = await getData();
+    if (status.loginIndex === 2) {
+      return true;
+    }
+
+    const elapsedTime = Date.now() - startTime;
+    if (elapsedTime > 10000) {
+      return false;
+    }
+  }
+}
+
+export async function waitForStartGame() {
+  await waitFor(async () => {
+    const { status } = await getData();
+
+    return status.clickToPlayX && status.clickToPlayY;
+  }, 15000);
+}
+
+export async function waitForUsernameFieldFocus() {
+  const startTime = Date.now();
+  while (true) {
+    robot.keyTap("tab");
+    await sleep(1000);
+    const { status } = await getData();
+    if (status.loginField === 0) {
+      return true;
+    }
+
+    const elapsedTime = Date.now() - startTime;
+    if (elapsedTime > 10000) {
+      return false;
+    }
+  }
+}
+
+export async function waitForPasswordFieldFocus() {
+  const startTime = Date.now();
+  while (true) {
+    robot.keyTap("tab");
+    await sleep(1000);
+    const { status } = await getData();
+    if (status.loginField === 1) {
+      return true;
+    }
+
+    const elapsedTime = Date.now() - startTime;
+    if (elapsedTime > 10000) {
+      return false;
+    }
+  }
+}
+
+function waitFor(callback, timeout = 5000) {
   return new Promise((resolve) => {
     const int = setInterval(async () => {
       const condition = await callback();
@@ -44,7 +103,7 @@ function waitFor(callback) {
     setTimeout(() => {
       resolve(true);
       clearInterval(int);
-    }, 5000);
+    }, timeout);
   });
 }
 

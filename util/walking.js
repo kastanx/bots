@@ -88,10 +88,11 @@ export async function walk(destinationX, destinationY, destinationZ = 0) {
 
       robot.keyToggle("shift", "down");
       await moveMouseClick(clickStatus.tileX, clickStatus.tileY, 2);
-      robot.keyToggle("shift", "up");
       await sleep(500);
     }
   }
+
+  robot.keyToggle("shift", "up");
 }
 
-walk(2632, 3675, 0);
+walk(3164, 3481, 0);

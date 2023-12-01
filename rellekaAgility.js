@@ -1,4 +1,5 @@
 import { INV_COORDS, RUN_COORDS, TOP_OFFSET } from "./config.js";
+import { login } from "./login.js";
 import { getData, getInv } from "./util/api.js";
 import { Area } from "./util/area.js";
 import {
@@ -86,7 +87,7 @@ async function loop() {
       const { status, groundItems } = await getData(0, 0, 0, 0, MARK_OF_GRACE);
 
       if (status?.gameState === "LOGIN_SCREEN") {
-        log("exiting process");
+        await login("jirikastovsky1994@gmail.com", "linux1604");
         process.exit();
       }
 
