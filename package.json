@@ -9,7 +9,9 @@
   },
   "type": "module",
   "dependencies": {
+    "discord.js": "^14.14.1",
     "node-fetch": "^3.3.2",
-    "robotjs": "^0.6.0"
+    "robotjs": "^0.6.0",
+    "screenshot-desktop": "^1.15.0"
   }
 }
