@@ -100,7 +100,8 @@ async function loop() {
             status.playerZ,
             tileX,
             tileY,
-            tileZ
+            tileZ,
+            MARK_OF_GRACE_AREAS
           )
         ) {
           await moveMouseClick(groundItems[0]?.x, groundItems[0]?.y);
